@@ -1,0 +1,32 @@
+services:
+  # Instanz 1: Quellsysteme (Helpdesk & Asset-Management)
+  postgres-source:
+    image: postgres:17-alpine
+    container_name: dwh_source_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: source_helpdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_source:/var/lib/postgresql/data
+
+  # Instanz 2: DWH (Staging, Core, Business)
+  postgres-dwh:
+    image: postgres:17-alpine
+    container_name: dwh_analytics_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: dwh_prod
+    ports:
+      - "5433:5432" # Host-Port 5433 zur Unterscheidung
+    volumes:
+      - pgdata_dwh:/var/lib/postgresql/data
+
+volumes:
+  pgdata_source:
+  pgdata_dwh:
