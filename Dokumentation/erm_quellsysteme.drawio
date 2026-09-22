@@ -288,7 +288,7 @@
         <mxCell id="r_24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=8;" value="Wartungsart" vertex="1">
           <mxGeometry height="26" width="240" x="780" y="378" as="geometry" />
         </mxCell>
-        <mxCell id="r_25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=8;" value="TechnikerNr (FK - MitarbeiterNr)" vertex="1">
+        <mxCell id="r_25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=8;" value="TechnikerNr (FK)" vertex="1">
           <mxGeometry height="26" width="240" x="780" y="404" as="geometry" />
         </mxCell>
         <mxCell id="r_26" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=8;" value="Kosten" vertex="1">
@@ -339,10 +339,10 @@
         <mxCell id="3sYYmeJzGCRHDLdtUL3u-3" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#333333;" value="1" vertex="1">
           <mxGeometry height="20" width="26" x="665" y="106" as="geometry" />
         </mxCell>
-        <mxCell id="qm_jESgp9a_pFKR8Dmi9-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;align=center;verticalAlign=middle;" value="Standort (siehe Quellsystem 2)" vertex="1">
+        <mxCell id="qm_jESgp9a_pFKR8Dmi9-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;align=center;verticalAlign=middle;" value="Mitarbeiter (siehe Quellsystem 1)" vertex="1">
           <mxGeometry height="30" width="240" x="374" y="374" as="geometry" />
         </mxCell>
-        <mxCell id="qm_jESgp9a_pFKR8Dmi9-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#6c8ebf;fontStyle=4;fontSize=12;align=left;spacingLeft=8;" value="StandortID (PK)" vertex="1">
+        <mxCell id="qm_jESgp9a_pFKR8Dmi9-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#6c8ebf;fontStyle=4;fontSize=12;align=left;spacingLeft=8;" value="MitarbeiterNr (PK)" vertex="1">
           <mxGeometry height="26" width="240" x="374" y="404" as="geometry" />
         </mxCell>
         <mxCell id="qm_jESgp9a_pFKR8Dmi9-4" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#333333;" value="1" vertex="1">
