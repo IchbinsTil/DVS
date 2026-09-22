@@ -1,41 +1,89 @@
--- Staging Helpdesk
-TRUNCATE TABLE staging.stg_hd_ticket;
-INSERT INTO staging.stg_hd_ticket (TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten)
-SELECT TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten 
-FROM fdw_helpdesk.ticket;
+CREATE SCHEMA IF NOT EXISTS staging;
+--CREATE SCHEMA IF NOT EXISTS core;
+--CREATE SCHEMA IF NOT EXISTS business;
 
-TRUNCATE TABLE staging.stg_hd_bearbeitung;
-INSERT INTO staging.stg_hd_bearbeitung (BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp)
-SELECT BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp 
-FROM fdw_helpdesk.bearbeitung;
+-- Staging für Quellsystem 1 (Helpdesk)
+DROP TABLE IF EXISTS staging.stg_hd_ticket CASCADE;
+CREATE TABLE staging.stg_hd_ticket (
+    TicketNr INT,
+    KundenNr INT,
+    GeräteNr INT,
+    Erstellungsdatum TIMESTAMP,
+    Kategorie VARCHAR(50),
+    Priorität VARCHAR(20),
+    Status VARCHAR(20),
+    SLA_Zielzeit_Minuten INT,
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-TRUNCATE TABLE staging.stg_hd_kunde;
-INSERT INTO staging.stg_hd_kunde (KundenNr, Kunden_Name, Kundentyp, StandortID)
-SELECT KundenNr, Kunden_Name, Kundentyp, StandortID 
-FROM fdw_helpdesk.kunde;
+DROP TABLE IF EXISTS staging.stg_hd_bearbeitung CASCADE;
+CREATE TABLE staging.stg_hd_bearbeitung (
+    BearbeitungsNr INT,
+    TicketNr INT,
+    MitarbeiterNr INT,
+    Datum TIMESTAMP,
+    Bearbeitungszeit_Minuten INT,
+    Aktionstyp VARCHAR(50),
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-TRUNCATE TABLE staging.stg_hd_mitarbeiter;
-INSERT INTO staging.stg_hd_mitarbeiter (MitarbeiterNr, Name, Team, Rolle)
-SELECT MitarbeiterNr, Name, Team, Rolle 
-FROM fdw_helpdesk.mitarbeiter;
+DROP TABLE IF EXISTS staging.stg_hd_kunde CASCADE;
+CREATE TABLE staging.stg_hd_kunde (
+    KundenNr INT,
+    Kunden_Name VARCHAR(100),
+    Kundentyp VARCHAR(50),
+    StandortID INT,
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- Staging Inventar & Wartung
-TRUNCATE TABLE staging.stg_inv_standort;
-INSERT INTO staging.stg_inv_standort (StandortID, Standortbezeichnung, Region, Land)
-SELECT StandortID, Standortbezeichnung, Region, Land 
-FROM fdw_inventar.standort;
+DROP TABLE IF EXISTS staging.stg_hd_mitarbeiter CASCADE;
+CREATE TABLE staging.stg_hd_mitarbeiter (
+    MitarbeiterNr INT,
+    Name VARCHAR(100),
+    Team VARCHAR(50),
+    Rolle VARCHAR(50),
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-TRUNCATE TABLE staging.stg_inv_geraet;
-INSERT INTO staging.stg_inv_geraet (GeräteNr, Gerätetyp, Hersteller, Modell, StandortID, Anschaffungsdatum)
-SELECT GeräteNr, Gerätetyp, Hersteller, Modell, StandortID, Anschaffungsdatum 
-FROM fdw_inventar.gerät;
+-- Staging für Quellsystem 2 (Inventar & Wartung)
+DROP TABLE IF EXISTS staging.stg_inv_standort CASCADE;
+CREATE TABLE staging.stg_inv_standort (
+    StandortID INT,
+    Standortbezeichnung VARCHAR(100),
+    Region VARCHAR(50),
+    Land VARCHAR(50),
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-TRUNCATE TABLE staging.stg_inv_wartungsvertrag;
-INSERT INTO staging.stg_inv_wartungsvertrag (VertragsNr, GeräteNr, Vertragsart, Beginn, Ende, Kosten_pro_Jahr)
-SELECT VertragsNr, GeräteNr, Vertragsart, Beginn, Ende, Kosten_pro_Jahr 
-FROM fdw_inventar.wartungsvertrag;
+DROP TABLE IF EXISTS staging.stg_inv_geraet CASCADE;
+CREATE TABLE staging.stg_inv_geraet (
+    GeräteNr INT,
+    Gerätetyp VARCHAR(50),
+    Hersteller VARCHAR(50),
+    Modell VARCHAR(50),
+    StandortID INT,
+    Anschaffungsdatum DATE,
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-TRUNCATE TABLE staging.stg_inv_wartung;
-INSERT INTO staging.stg_inv_wartung (WartungsNr, GeräteNr, Datum, Wartungsart, TechnikerNr, Kosten)
-SELECT WartungsNr, GeräteNr, Datum, Wartungsart, TechnikerNr, Kosten 
-FROM fdw_inventar.wartung;
+DROP TABLE IF EXISTS staging.stg_inv_wartungsvertrag CASCADE;
+CREATE TABLE staging.stg_inv_wartungsvertrag (
+    VertragsNr INT,
+    GeräteNr INT,
+    Vertragsart VARCHAR(50),
+    Beginn DATE,
+    Ende DATE,
+    Kosten_pro_Jahr NUMERIC(10, 2),
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS staging.stg_inv_wartung CASCADE;
+CREATE TABLE staging.stg_inv_wartung (
+    WartungsNr INT,
+    GeräteNr INT,
+    Datum DATE,
+    Wartungsart VARCHAR(50),
+    TechnikerNr INT,
+    Kosten NUMERIC(10, 2),
+    stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,62 +1,64 @@
--- 1. Extension für Fremddatenbanken aktivieren
+CREATE SCHEMA IF NOT EXISTS staging;
+
+-- Extension für Fremddatenbanken aktivieren
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
--- 2. Verbindungsserver zum Quellsystem definieren
+-- Verbindungsserver zum Quellsystem definieren
 DROP SERVER IF EXISTS src_server CASCADE;
 CREATE SERVER src_server
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'postgres-source', port '5432', dbname 'source_helpdesk');
+    OPTIONS (host 'postgres-source', port '5432', dbname 'source_ticketsystem');
 
--- 3. Benutzer-Mapping anlegen (Passwort aus deiner .env eintragen)
+-- Benutzer-Mapping anlegen (Passwort aus deiner .env eintragen)
 CREATE USER MAPPING FOR admin
     SERVER src_server
     OPTIONS (user 'admin', password 'password');
 
--- 4. Quell-Schemas temporär als Fremdschemas einbinden
-CREATE SCHEMA IF NOT EXISTS fdw_helpdesk;
-CREATE SCHEMA IF NOT EXISTS fdw_inventar;
+-- Quell-Schemas temporär als Fremdschemas einbinden
+CREATE SCHEMA IF NOT EXISTS fdw_ticketsystem;
+CREATE SCHEMA IF NOT EXISTS fdw_inventarsystem;
 
-IMPORT FOREIGN SCHEMA src_helpdesk FROM SERVER src_server INTO fdw_helpdesk;
-IMPORT FOREIGN SCHEMA src_inventar FROM SERVER src_server INTO fdw_inventar;
+IMPORT FOREIGN SCHEMA src_ticketsystem FROM SERVER src_server INTO fdw_ticketsystem;
+IMPORT FOREIGN SCHEMA src_inventarsystem FROM SERVER src_server INTO fdw_inventarsystem;
 
 -- Staging Helpdesk
 TRUNCATE TABLE staging.stg_hd_ticket;
 INSERT INTO staging.stg_hd_ticket (TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten)
 SELECT TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten
-FROM fdw_helpdesk.ticket;
+FROM fdw_ticketsystem.ticket;
 
 TRUNCATE TABLE staging.stg_hd_bearbeitung;
 INSERT INTO staging.stg_hd_bearbeitung (BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp)
 SELECT BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp
-FROM fdw_helpdesk.bearbeitung;
+FROM fdw_ticketsystem.bearbeitung;
 
 TRUNCATE TABLE staging.stg_hd_kunde;
 INSERT INTO staging.stg_hd_kunde (KundenNr, Kunden_Name, Kundentyp, StandortID)
 SELECT KundenNr, Kunden_Name, Kundentyp, StandortID
-FROM fdw_helpdesk.kunde;
+FROM fdw_ticketsystem.kunde;
 
 TRUNCATE TABLE staging.stg_hd_mitarbeiter;
 INSERT INTO staging.stg_hd_mitarbeiter (MitarbeiterNr, Name, Team, Rolle)
 SELECT MitarbeiterNr, Name, Team, Rolle
-FROM fdw_helpdesk.mitarbeiter;
+FROM fdw_ticketsystem.mitarbeiter;
 
 -- Staging Inventar & Wartung
 TRUNCATE TABLE staging.stg_inv_standort;
 INSERT INTO staging.stg_inv_standort (StandortID, Standortbezeichnung, Region, Land)
 SELECT StandortID, Standortbezeichnung, Region, Land
-FROM fdw_inventar.standort;
+FROM fdw_inventarsystem.standort;
 
 TRUNCATE TABLE staging.stg_inv_geraet;
 INSERT INTO staging.stg_inv_geraet (GeräteNr, Gerätetyp, Hersteller, Modell, StandortID, Anschaffungsdatum)
 SELECT GeräteNr, Gerätetyp, Hersteller, Modell, StandortID, Anschaffungsdatum
-FROM fdw_inventar.gerät;
+FROM fdw_inventarsystem.gerät;
 
 TRUNCATE TABLE staging.stg_inv_wartungsvertrag;
 INSERT INTO staging.stg_inv_wartungsvertrag (VertragsNr, GeräteNr, Vertragsart, Beginn, Ende, Kosten_pro_Jahr)
 SELECT VertragsNr, GeräteNr, Vertragsart, Beginn, Ende, Kosten_pro_Jahr
-FROM fdw_inventar.wartungsvertrag;
+FROM fdw_inventarsystem.wartungsvertrag;
 
 TRUNCATE TABLE staging.stg_inv_wartung;
 INSERT INTO staging.stg_inv_wartung (WartungsNr, GeräteNr, Datum, Wartungsart, TechnikerNr, Kosten)
 SELECT WartungsNr, GeräteNr, Datum, Wartungsart, TechnikerNr, Kosten
-FROM fdw_inventar.wartung;
+FROM fdw_inventarsystem.wartung;
