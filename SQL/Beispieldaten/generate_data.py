@@ -318,15 +318,10 @@ def generate_account_managers(customers):
     managers = []
     used_names = set()
 
-    # Jeder Kunde erhält genau einen Kundenbetreuer.
-    # Mehrere Kunden können denselben Betreuer haben.
-    manager_pool = []
-
-    manager_count = random.randint(3, 4)
-
-    for i in range(manager_count):
-        manager_pool.append({
+    for i, customer in enumerate(customers):
+        managers.append({
             "BetreuerNr": 301 + i,
+            "KundenNr": customer["KundenNr"],
             "Name": create_name(used_names),
             "Team": random.choice([
                 "Key Accounts",
@@ -335,18 +330,7 @@ def generate_account_managers(customers):
             ]),
         })
 
-    for customer in customers:
-        manager = random.choice(manager_pool)
-
-        managers.append({
-            "BetreuerNr": manager["BetreuerNr"],
-            "KundenNr": customer["KundenNr"],
-            "Name": manager["Name"],
-            "Team": manager["Team"],
-        })
-
     return managers
-
 
 def generate_devices(locations):
     count = random.randint(60, 100)
