@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 DROP SERVER IF EXISTS src_server CASCADE;
 CREATE SERVER src_server
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'postgres-source', port '5432', dbname 'source_ticketsystem');
+    OPTIONS (host 'postgres-source', port '5432', dbname 'quellsystem');
 
 -- Benutzer-Mapping anlegen (Passwort aus deiner .env eintragen)
 CREATE USER MAPPING FOR admin
@@ -22,23 +22,23 @@ IMPORT FOREIGN SCHEMA src_ticketsystem FROM SERVER src_server INTO fdw_ticketsys
 IMPORT FOREIGN SCHEMA src_inventarsystem FROM SERVER src_server INTO fdw_inventarsystem;
 
 -- Staging Helpdesk
-TRUNCATE TABLE staging.stg_hd_ticket;
-INSERT INTO staging.stg_hd_ticket (TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten)
+TRUNCATE TABLE staging.stg_ts_ticket;
+INSERT INTO staging.stg_ts_ticket (TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten)
 SELECT TicketNr, KundenNr, GeräteNr, Erstellungsdatum, Kategorie, Priorität, Status, SLA_Zielzeit_Minuten
 FROM fdw_ticketsystem.ticket;
 
-TRUNCATE TABLE staging.stg_hd_bearbeitung;
-INSERT INTO staging.stg_hd_bearbeitung (BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp)
+TRUNCATE TABLE staging.stg_ts_bearbeitung;
+INSERT INTO staging.stg_ts_bearbeitung (BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp)
 SELECT BearbeitungsNr, TicketNr, MitarbeiterNr, Datum, Bearbeitungszeit_Minuten, Aktionstyp
 FROM fdw_ticketsystem.bearbeitung;
 
-TRUNCATE TABLE staging.stg_hd_kunde;
-INSERT INTO staging.stg_hd_kunde (KundenNr, Kunden_Name, Kundentyp, StandortID)
+TRUNCATE TABLE staging.stg_ts_kunde;
+INSERT INTO staging.stg_ts_kunde (KundenNr, Kunden_Name, Kundentyp, StandortID)
 SELECT KundenNr, Kunden_Name, Kundentyp, StandortID
 FROM fdw_ticketsystem.kunde;
 
-TRUNCATE TABLE staging.stg_hd_mitarbeiter;
-INSERT INTO staging.stg_hd_mitarbeiter (MitarbeiterNr, Name, Team, Rolle)
+TRUNCATE TABLE staging.stg_ts_mitarbeiter;
+INSERT INTO staging.stg_ts_mitarbeiter (MitarbeiterNr, Name, Team, Rolle)
 SELECT MitarbeiterNr, Name, Team, Rolle
 FROM fdw_ticketsystem.mitarbeiter;
 

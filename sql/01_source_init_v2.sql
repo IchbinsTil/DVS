@@ -1,20 +1,10 @@
 -- Init-Skript der Quellsysteme (nur Schema, keine Beispieldaten)
 -- Beispieldaten werden separat erzeugt und eingespielt.
 
-CREATE SCHEMA IF NOT EXISTS src_ticketsystem;
-CREATE SCHEMA IF NOT EXISTS src_inventarsystem;
-
--- Vorhandene Tabellen entfernen (Kindtabellen zuerst)
-DROP TABLE IF EXISTS src_ticketsystem.Bearbeitung CASCADE;
-DROP TABLE IF EXISTS src_ticketsystem.Ticket CASCADE;
-DROP TABLE IF EXISTS src_ticketsystem.Kundenbetreuer CASCADE;
-DROP TABLE IF EXISTS src_ticketsystem.Mitarbeiter CASCADE;
-DROP TABLE IF EXISTS src_ticketsystem.Kunde CASCADE;
-
-DROP TABLE IF EXISTS src_inventarsystem.Wartung CASCADE;
-DROP TABLE IF EXISTS src_inventarsystem.Wartungsvertrag CASCADE;
-DROP TABLE IF EXISTS src_inventarsystem.Gerät CASCADE;
-DROP TABLE IF EXISTS src_inventarsystem.Standort CASCADE;
+DROP SCHEMA IF EXISTS src_ticketsystem CASCADE;
+DROP SCHEMA IF EXISTS src_inventarsystem CASCADE;
+CREATE SCHEMA src_ticketsystem;
+CREATE SCHEMA src_inventarsystem;
 
 -- ---------------------------------------------------------------
 -- Quellsystem 2: Geräte-/Netzwerkinventar und Wartung

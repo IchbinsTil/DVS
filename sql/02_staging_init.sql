@@ -1,10 +1,8 @@
-CREATE SCHEMA IF NOT EXISTS staging;
---CREATE SCHEMA IF NOT EXISTS core;
---CREATE SCHEMA IF NOT EXISTS business;
+DROP SCHEMA IF EXISTS staging CASCADE;
+CREATE SCHEMA staging;
 
 -- Staging für Quellsystem 1 (Helpdesk)
-DROP TABLE IF EXISTS staging.stg_hd_ticket CASCADE;
-CREATE TABLE staging.stg_hd_ticket (
+CREATE TABLE staging.stg_ts_ticket (
     TicketNr INT,
     KundenNr INT,
     GeräteNr INT,
@@ -16,8 +14,7 @@ CREATE TABLE staging.stg_hd_ticket (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_hd_bearbeitung CASCADE;
-CREATE TABLE staging.stg_hd_bearbeitung (
+CREATE TABLE staging.stg_ts_bearbeitung (
     BearbeitungsNr INT,
     TicketNr INT,
     MitarbeiterNr INT,
@@ -27,8 +24,7 @@ CREATE TABLE staging.stg_hd_bearbeitung (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_hd_kunde CASCADE;
-CREATE TABLE staging.stg_hd_kunde (
+CREATE TABLE staging.stg_ts_kunde (
     KundenNr INT,
     Kunden_Name VARCHAR(100),
     Kundentyp VARCHAR(50),
@@ -36,8 +32,7 @@ CREATE TABLE staging.stg_hd_kunde (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_hd_mitarbeiter CASCADE;
-CREATE TABLE staging.stg_hd_mitarbeiter (
+CREATE TABLE staging.stg_ts_mitarbeiter (
     MitarbeiterNr INT,
     Name VARCHAR(100),
     Team VARCHAR(50),
@@ -46,7 +41,6 @@ CREATE TABLE staging.stg_hd_mitarbeiter (
 );
 
 -- Staging für Quellsystem 2 (Inventar & Wartung)
-DROP TABLE IF EXISTS staging.stg_inv_standort CASCADE;
 CREATE TABLE staging.stg_inv_standort (
     StandortID INT,
     Standortbezeichnung VARCHAR(100),
@@ -55,7 +49,6 @@ CREATE TABLE staging.stg_inv_standort (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_inv_geraet CASCADE;
 CREATE TABLE staging.stg_inv_geraet (
     GeräteNr INT,
     Gerätetyp VARCHAR(50),
@@ -66,7 +59,6 @@ CREATE TABLE staging.stg_inv_geraet (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_inv_wartungsvertrag CASCADE;
 CREATE TABLE staging.stg_inv_wartungsvertrag (
     VertragsNr INT,
     GeräteNr INT,
@@ -77,7 +69,6 @@ CREATE TABLE staging.stg_inv_wartungsvertrag (
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS staging.stg_inv_wartung CASCADE;
 CREATE TABLE staging.stg_inv_wartung (
     WartungsNr INT,
     GeräteNr INT,
