@@ -1,0 +1,8 @@
+[Unit]
+Description=DWH ETL Pipeline Execution
+
+[Service]
+Type=oneshot
+Environment="PATH=/run/current-system/sw/bin:/home/paul/.nix-profile/bin:/bin:/usr/bin"
+WorkingDirectory=/home/paul/dev/dhsn/dvs/automatisierung
+ExecStart=/home/paul/dev/dhsn/dvs/automatisierung/03_run_pipeline.sh

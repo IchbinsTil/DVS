@@ -1,32 +1,47 @@
 services:
-  # Instanz 1: Quellsysteme (Helpdesk & Asset-Management)
-  postgres-source:
+  # Instanz 1: Quellsystem 1 - Ticketsystem
+  postgres-source-ticketsystem:
     image: postgres:17-alpine
-    container_name: dwh_source_db
+    container_name: dwh_source_ticketsystem_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: quellsystem
+      POSTGRES_USER: ${TS_DB_USER}
+      POSTGRES_PASSWORD: ${TS_DB_PASSWORD}
+      POSTGRES_DB: ${TS_DB_NAME}
     ports:
-      - "5432:5432"
+      - "${TS_HOST_PORT}:5432"
     volumes:
-      - pgdata_source:/var/lib/postgresql/data
+      - pgdata_source_ticketsystem:/var/lib/postgresql/data
 
-  # Instanz 2: DWH (Staging, Core, Business)
+  # Instanz 2: Quellsystem 2 - Inventarsystem
+  postgres-source-inventarsystem:
+    image: postgres:17-alpine
+    container_name: dwh_source_inventarsystem_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${IS_DB_USER}
+      POSTGRES_PASSWORD: ${IS_DB_PASSWORD}
+      POSTGRES_DB: ${IS_DB_NAME}
+    ports:
+      - "${IS_HOST_PORT}:5432"
+    volumes:
+      - pgdata_source_inventarsystem:/var/lib/postgresql/data
+
+  # Instanz 3: DWH (Staging, Core, Business)
   postgres-dwh:
     image: postgres:17-alpine
     container_name: dwh_analytics_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: dwh_prod
+      POSTGRES_USER: ${DWH_DB_USER}
+      POSTGRES_PASSWORD: ${DWH_DB_PASSWORD}
+      POSTGRES_DB: ${DWH_DB_NAME}
     ports:
-      - "5433:5432" # Host-Port 5433 zur Unterscheidung
+      - "${DWH_HOST_PORT}:5432"
     volumes:
       - pgdata_dwh:/var/lib/postgresql/data
 
 volumes:
-  pgdata_source:
+  pgdata_source_ticketsystem:
+  pgdata_source_inventarsystem:
   pgdata_dwh:

@@ -1,18 +1,11 @@
-WIP
--- ============================================================
--- 04_core_layer.sql
--- DWH-Core-Schicht: Themenorientierte Tabellen (Topic Tables)
--- Gemäß Mapping-Matrix für Fragestellung 1 & 2
--- ============================================================
-
 DROP SCHEMA IF EXISTS core CASCADE;
 CREATE SCHEMA core;
 
--- ============================================================
--- 1. DDL: TOPIC-TABELLEN IM CORE-SCHEMA ANLEGEN
--- ============================================================
+-- TOPIC-TABELLEN IM CORE-SCHEMA ANLEGEN
 
+-- ---------------------------------------------------------------
 -- Fragestellung 1: Topic-Tabelle für SLA- & Bearbeitungszeiten
+-- ---------------------------------------------------------------
 DROP TABLE IF EXISTS core.topic_sla_bearbeitung CASCADE;
 CREATE TABLE core.topic_sla_bearbeitung (
     "Gerät_GeräteNr"                       INT,
@@ -31,7 +24,9 @@ CREATE TABLE core.topic_sla_bearbeitung (
     core_loaded_at                         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ---------------------------------------------------------------
 -- Fragestellung 2: Topic-Tabelle für Wartungskosten & Ticketaufkommen
+-- ---------------------------------------------------------------
 DROP TABLE IF EXISTS core.topic_wartungskosten CASCADE;
 CREATE TABLE core.topic_wartungskosten (
     "Gerät_GeräteNr"                       INT,
@@ -51,18 +46,11 @@ CREATE TABLE core.topic_wartungskosten (
 );
 
 
--- ============================================================
--- 2. TRANSFORMATION & LADEN (Staging -> Core)
--- ============================================================
+-- LADEN (Staging -> Core)
 
--- Vor jedem Ladelauf Core-Tabellen leeren
-TRUNCATE TABLE core.topic_sla_bearbeitung;
-TRUNCATE TABLE core.topic_wartungskosten;
-
--- ------------------------------------------------------------
+-- ---------------------------------------------------------------
 -- Befüllung Topic 1: Bearbeitungs- und SLA-Zeiten
--- Kette: TS_Bearbeitung -> TS_Ticket -> IS_Gerät -> IS_Standort
--- ------------------------------------------------------------
+-- ---------------------------------------------------------------
 INSERT INTO core.topic_sla_bearbeitung (
     "Gerät_GeräteNr",
     "Gerät_Gerätetyp",
@@ -101,10 +89,9 @@ INNER JOIN staging.stg_inv_standort s
     ON g.StandortID = s.StandortID;
 
 
--- ------------------------------------------------------------
+-- ---------------------------------------------------------------
 -- Befüllung Topic 2: Wartungskosten & Ticketaufkommen
--- Kette: IS_Gerät -> IS_Standort, IS_Wartungsvertrag, IS_Wartung, TS_Ticket
--- ------------------------------------------------------------
+-- ---------------------------------------------------------------
 INSERT INTO core.topic_wartungskosten (
     "Gerät_GeräteNr",
     "Gerät_Gerätetyp",

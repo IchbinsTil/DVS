@@ -1,0 +1,10 @@
+==================================================
+ETL-Pipeline gestartet: 2026-09-25 14:15:00
+==================================================
+[14:15:00] Führe ../sql/03_etl_staging.sql aus...
+CREATE SCHEMA
+NOTICE:  schema "fdw_ticketsystem" already exists, skipping
+CREATE SCHEMA
+NOTICE:  schema "fdw_inventarsystem" already exists, skipping
+ERROR:  relation "bearbeitung" already exists
+CONTEXT:  importing foreign table "bearbeitung"

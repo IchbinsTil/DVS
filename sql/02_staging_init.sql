@@ -1,6 +1,34 @@
 DROP SCHEMA IF EXISTS staging CASCADE;
 CREATE SCHEMA staging;
 
+-- Extension für Fremddatenbanken aktivieren
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- Verbindungsserver zum Quellsystem definieren
+DROP SERVER IF EXISTS src_server_ts CASCADE;
+CREATE SERVER src_server_ts
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'postgres-source-ticketsystem', port '5432', dbname 'ticketsystem');
+DROP SERVER IF EXISTS src_server_is CASCADE;
+CREATE SERVER src_server_is
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'postgres-source-inventarsystem', port '5432', dbname 'inventarsystem');
+
+-- Benutzer-Mapping anlegen
+/*CREATE USER MAPPING FOR admin
+    SERVER src_server_ts
+    OPTIONS (user 'admin', password 'password');
+CREATE USER MAPPING FOR admin
+    SERVER src_server_is
+    OPTIONS (user 'admin', password 'password');
+*/
+CREATE USER MAPPING FOR CURRENT_USER
+    SERVER src_server_ts
+    OPTIONS (user :'ts_user', password :'ts_password');
+CREATE USER MAPPING FOR CURRENT_USER
+    SERVER src_server_is
+    OPTIONS (user :'is_user', password :'is_password');
+
 -- Staging für Quellsystem 1 (Helpdesk)
 CREATE TABLE staging.stg_ts_ticket (
     TicketNr INT,
@@ -56,6 +84,7 @@ CREATE TABLE staging.stg_inv_geraet (
     Modell VARCHAR(50),
     StandortID INT,
     Anschaffungsdatum DATE,
+    KundenNr INT NOT NULL,
     stg_loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
