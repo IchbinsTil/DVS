@@ -3,8 +3,8 @@
 # Startet den ETL-Lauf im Postgres-Container.
 # Container-Name unten anpassen.
 #
-# Automatisierung per Cron auf dem Docker-Host (täglich 02:00):
-#   0 2 * * * /opt/dwh/04_run_etl.sh >> /var/log/dwh_etl.log 2>&1
+# Automatisierung per Cron auf dem Docker-Host (täglich 04:00):
+#   0 4 * * * /opt/dwh/04_run_etl.sh >> /var/log/dwh_etl.log 2>&1
 # =========================================================
 set -euo pipefail
 
