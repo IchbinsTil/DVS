@@ -1,47 +1,16 @@
 services:
-  # Instanz 1: Quellsystem 1 - Ticketsystem
-  postgres-source-ticketsystem:
-    image: postgres:17-alpine
-    container_name: dwh_source_ticketsystem_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${TS_DB_USER}
-      POSTGRES_PASSWORD: ${TS_DB_PASSWORD}
-      POSTGRES_DB: ${TS_DB_NAME}
-    ports:
-      - "${TS_HOST_PORT}:5432"
-    volumes:
-      - pgdata_source_ticketsystem:/var/lib/postgresql/data
-
-  # Instanz 2: Quellsystem 2 - Inventarsystem
   postgres-source-inventarsystem:
     image: postgres:17-alpine
-    container_name: dwh_source_inventarsystem_db
+    container_name: ${CONTAINER_NAME}
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${IS_DB_USER}
-      POSTGRES_PASSWORD: ${IS_DB_PASSWORD}
-      POSTGRES_DB: ${IS_DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${IS_HOST_PORT}:5432"
+      - "${HOST_PORT}:5432"
     volumes:
-      - pgdata_source_inventarsystem:/var/lib/postgresql/data
-
-  # Instanz 3: DWH (Staging, Core, Business)
-  postgres-dwh:
-    image: postgres:17-alpine
-    container_name: dwh_analytics_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${DWH_DB_USER}
-      POSTGRES_PASSWORD: ${DWH_DB_PASSWORD}
-      POSTGRES_DB: ${DWH_DB_NAME}
-    ports:
-      - "${DWH_HOST_PORT}:5432"
-    volumes:
-      - pgdata_dwh:/var/lib/postgresql/data
-
+      - pgdata_prod:/var/lib/postgresql/data
+      - ./docker-init:/docker-entrypoint-initdb.d
 volumes:
-  pgdata_source_ticketsystem:
-  pgdata_source_inventarsystem:
-  pgdata_dwh:
+  pgdata_prod:
