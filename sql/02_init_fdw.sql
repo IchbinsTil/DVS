@@ -14,9 +14,7 @@ DROP SCHEMA IF EXISTS fdw_inventarsystem CASCADE;
 DROP SERVER IF EXISTS srv_ticketsystem CASCADE;
 DROP SERVER IF EXISTS srv_inventarsystem CASCADE;
 
--- ---------------------------------------------------------
 -- Server (gleicher Postgres-Container, daher localhost)
--- ---------------------------------------------------------
 CREATE SERVER srv_ticketsystem
     FOREIGN DATA WRAPPER postgres_fdw
     OPTIONS (host 'localhost', port '5432', dbname 'ticketsystem');
@@ -25,22 +23,16 @@ CREATE SERVER srv_inventarsystem
     FOREIGN DATA WRAPPER postgres_fdw
     OPTIONS (host 'localhost', port '5432', dbname 'inventarsystem');
 
--- ---------------------------------------------------------
 -- Benutzerzuordnung
--- Im Standard-Image ist localhost für den Superuser per trust
--- erlaubt. Falls ein Passwort nötig ist, password '...' ergänzen.
--- ---------------------------------------------------------
 CREATE USER MAPPING FOR CURRENT_USER
     SERVER srv_ticketsystem
-    OPTIONS (user 'postgres' /*, password 'geheim' */);
+    OPTIONS (user 'postgres', password 'YOUR_PASSWORD');
 
 CREATE USER MAPPING FOR CURRENT_USER
     SERVER srv_inventarsystem
-    OPTIONS (user 'postgres' /*, password 'geheim' */);
+    OPTIONS (user 'postgres', password 'YOUR_PASSWORD');
 
--- ---------------------------------------------------------
 -- Fremdtabellen einbinden
--- ---------------------------------------------------------
 CREATE SCHEMA fdw_ticketsystem;
 CREATE SCHEMA fdw_inventarsystem;
 
@@ -55,6 +47,3 @@ IMPORT FOREIGN SCHEMA src_inventarsystem
 -- Schema für die Ladeprozeduren
 CREATE SCHEMA IF NOT EXISTS etl;
 
--- Kontrolle (optional):
---   SELECT count(*) FROM fdw_ticketsystem.Ticket;
---   SELECT count(*) FROM fdw_inventarsystem.Gerät;

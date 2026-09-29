@@ -8,13 +8,11 @@
 # =========================================================
 set -euo pipefail
 
-CONTAINER="postgres"
-DB="datawarehouse"
-DB_USER="postgres"
+source ../.env
 
 echo "$(date '+%F %T') ETL-Lauf gestartet"
 
-docker exec "$CONTAINER" psql -U "$DB_USER" -d "$DB" \
+docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" \
     -v ON_ERROR_STOP=1 \
     -c "CALL etl.load_dwh();"
 

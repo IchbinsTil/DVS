@@ -5,9 +5,7 @@
 -- Nur Struktur (Tabellen, Schlüssel), keine Daten.
 -- =========================================================
 
--- Vor der Ausführung mit der Datenbank datawarehouse verbinden, z. B.:
---   CREATE DATABASE datawarehouse;
---   \connect datawarehouse
+-- Vor der Ausführung mit der Datenbank datawarehouse verbinden.
 
 DROP SCHEMA IF EXISTS business CASCADE;
 DROP SCHEMA IF EXISTS core CASCADE;
@@ -98,9 +96,7 @@ CREATE TABLE staging.TS_Bearbeitung (
 
 -- Hinweis: Kunde und Kundenbetreuer werden für die beiden aktuellen
 -- Fragestellungen nicht benötigt und sind deshalb kein Teil des
--- Staging-Schemas. Wird das offene Thema Dim_Standort.Kunde später über
--- eine eigene Kunden-Dimension gelöst (siehe DWH-Mapping, Variante b),
--- muss staging.TS_Kunde ergänzt werden.
+-- Staging-Schemas.
 
 
 -- =========================================================
