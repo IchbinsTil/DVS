@@ -1,0 +1,62 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="Systemarchitektur" id="sysarch">
+    <mxGraphModel dx="778" dy="541" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="dockerhost" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 4;fillColor=none;strokeColor=#666666;verticalAlign=top;align=left;spacingLeft=10;spacingTop=10;fontSize=14;fontStyle=1;fontColor=#666666;" value="Docker-Host" vertex="1">
+          <mxGeometry height="420" width="760" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pgbox" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;align=left;spacingLeft=10;spacingTop=10;fontSize=12;fontStyle=1;" value="PostgreSQL-Container (ein Server, drei Datenbanken)" vertex="1">
+          <mxGeometry height="330" width="500" x="80" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="db_ticket" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Datenbank&#xa;ticketsystem&#xa;(Schema src_ticketsystem)" vertex="1">
+          <mxGeometry height="90" width="180" x="110" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="db_inv" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Datenbank&#xa;inventarsystem&#xa;(Schema src_inventarsystem)" vertex="1">
+          <mxGeometry height="90" width="180" x="110" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_dwh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=center;spacingTop=8;fontSize=13;fontStyle=1;" value="Datenbank datawarehouse" vertex="1">
+          <mxGeometry height="240" width="200" x="340" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="sch_staging" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Schema: staging" vertex="1">
+          <mxGeometry height="40" width="160" x="360" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="sch_core" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Schema: core" vertex="1">
+          <mxGeometry height="40" width="160" x="360" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="sch_business" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Schema: business" vertex="1">
+          <mxGeometry height="40" width="160" x="360" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudbeaver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="CloudBeaver&#xa;(Community Edition)&#xa;Administration, Monitoring,&#xa;visuelle Datenabfrage" vertex="1">
+          <mxGeometry height="110" width="160" x="620" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="db_ticket" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#333333;" target="db_dwh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="db_inv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#333333;" target="db_dwh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="cloudbeaver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=block;startArrow=block;endFill=1;startFill=1;strokeColor=#9673a6;" target="db_dwh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="cloudbeaver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=block;startArrow=block;endFill=1;startFill=1;strokeColor=#9673a6;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="db_ticket">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="150" />
+              <mxPoint x="200" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="cloudbeaver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=block;startArrow=block;endFill=1;startFill=1;strokeColor=#9673a6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="db_inv">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="420" />
+              <mxPoint x="200" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
