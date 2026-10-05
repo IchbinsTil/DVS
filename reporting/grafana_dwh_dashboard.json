@@ -7,7 +7,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "editable": true,
   "graphTooltip": 1,
   "refresh": "",
@@ -53,15 +53,30 @@
   },
   "panels": [
     {
+      "id": 20,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Aufbau dieses Dashboards\n\nJede Fragestellung ist in zwei Abschnitte geteilt.\n\n**Datengrundlage**: beschreibende Kennzahlen, die den Kontext liefern, aber die Fragestellung für sich genommen noch nicht beantworten, zum Beispiel Gesamtwerte, Aufschlüsselung nach Priorität oder Team, Zeitverlauf.\n\n**Antwort auf die Fragestellung**: Panels, die genau die im Konzeptpapier formulierte Frage beantworten, mit Vergleich zum Gesamtwert beziehungsweise mit Verhältniskennzahl zum Ticketaufkommen."
+      }
+    },
+    {
       "id": 1,
       "type": "row",
-      "title": "Frage 1: SLA-Konformität",
+      "title": "Frage 1: Datengrundlage",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 4
       },
       "panels": []
     },
@@ -78,7 +93,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 1
+        "y": 5
       },
       "fieldConfig": {
         "defaults": {
@@ -146,7 +161,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 1
+        "y": 5
       },
       "fieldConfig": {
         "defaults": {
@@ -201,6 +216,7 @@
       "id": 4,
       "type": "bargauge",
       "title": "SLA-Quote je Priorität",
+      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${datasource}"
@@ -209,7 +225,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 1
+        "y": 5
       },
       "fieldConfig": {
         "defaults": {
@@ -276,7 +292,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 9
       },
       "fieldConfig": {
         "defaults": {
@@ -331,7 +347,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 17
       },
       "fieldConfig": {
         "defaults": {
@@ -379,15 +395,264 @@
       ]
     },
     {
-      "id": 7,
+      "id": 21,
       "type": "row",
-      "title": "Frage 2: Wartungs- und Vertragskosten",
+      "title": "Frage 1: Antwort auf die Fragestellung",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 25
+      },
+      "panels": []
+    },
+    {
+      "id": 14,
+      "type": "bargauge",
+      "title": "SLA-Quote je Hersteller",
+      "description": "Beantwortet den ersten Teil von Frage 1: Variiert die SLA-Konformität nach Hersteller? Aufsteigend sortiert, schwächster Hersteller zuerst.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 95
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "/^SLA-Quote$/",
+          "values": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT g.hersteller AS \"Hersteller\",\n       100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS \"SLA-Quote\"\nFROM business.sla_bearbeitung_facts f\nJOIN business.dim_geraet g ON g.geraet_sk = f.geraet_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\nGROUP BY 1\nORDER BY 2 ASC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "bargauge",
+      "title": "SLA-Quote je Standort",
+      "description": "Beantwortet den ersten Teil von Frage 1: Variiert die SLA-Konformität nach Standort? Aufsteigend sortiert, schwächster Standort zuerst.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 95
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "/^SLA-Quote$/",
+          "values": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT s.standortname AS \"Standort\",\n       100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS \"SLA-Quote\"\nFROM business.sla_bearbeitung_facts f\nJOIN business.dim_standort s ON s.standort_sk = f.standort_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\nGROUP BY 1\nORDER BY 2 ASC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "table",
+      "title": "Δ zum Gesamtwert je Hersteller und Standort",
+      "description": "Beantwortet den zweiten Teil von Frage 1: Negative Differenz kennzeichnet einen Schwerpunkt bei SLA-Überschreitungen",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Konformitätsrate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Δ zum Gesamtwert"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "transparent",
+                      "value": -0.01
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Δ zum Gesamtwert",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH gesamt AS (\n    SELECT 100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS quote\n    FROM business.sla_bearbeitung_facts f\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum)\n),\nje_hersteller AS (\n    SELECT 'Hersteller' AS \"Gruppentyp\", g.hersteller AS \"Gruppe\",\n           count(*) AS \"Anzahl Vorgänge\",\n           100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS quote\n    FROM business.sla_bearbeitung_facts f\n    JOIN business.dim_geraet g ON g.geraet_sk = f.geraet_sk\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum)\n    GROUP BY 1, 2\n),\nje_standort AS (\n    SELECT 'Standort' AS \"Gruppentyp\", s.standortname AS \"Gruppe\",\n           count(*) AS \"Anzahl Vorgänge\",\n           100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS quote\n    FROM business.sla_bearbeitung_facts f\n    JOIN business.dim_standort s ON s.standort_sk = f.standort_sk\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum)\n    GROUP BY 1, 2\n)\nSELECT \"Gruppentyp\", \"Gruppe\", \"Anzahl Vorgänge\",\n       round(quote, 1) AS \"Konformitätsrate\",\n       round(quote - (SELECT quote FROM gesamt), 1) AS \"Δ zum Gesamtwert\"\nFROM (\n    SELECT * FROM je_hersteller\n    UNION ALL\n    SELECT * FROM je_standort\n) alle\nORDER BY \"Δ zum Gesamtwert\" ASC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Frage 2: Datengrundlage",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 43
       },
       "panels": []
     },
@@ -404,7 +669,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 22
+        "y": 44
       },
       "fieldConfig": {
         "defaults": {
@@ -464,7 +729,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 22
+        "y": 44
       },
       "fieldConfig": {
         "defaults": {
@@ -524,7 +789,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 22
+        "y": 44
       },
       "fieldConfig": {
         "defaults": {
@@ -584,7 +849,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 44
       },
       "fieldConfig": {
         "defaults": {
@@ -644,7 +909,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 48
       },
       "fieldConfig": {
         "defaults": {
@@ -692,9 +957,23 @@
       ]
     },
     {
-      "id": 13,
+      "id": 22,
+      "type": "row",
+      "title": "Frage 2: Antwort auf die Fragestellung",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "panels": []
+    },
+    {
+      "id": 17,
       "type": "table",
-      "title": "Kosten und Tickets je Standort",
+      "title": "Kosten pro Ticket je Gerätetyp",
+      "description": "Beantwortet Frage 2 für Gerätetyp: Kosten pro Ticket = Summe Gesamtkosten / Summe Tickets, nicht Mittel der Monatsquotienten",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${datasource}"
@@ -703,7 +982,102 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gesamtkosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kosten pro Ticket"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "lcd"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlPu"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Kosten pro Ticket",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT g.bezeichnung AS \"Gerätetyp\",\n       sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS \"Gesamtkosten\",\n       sum(f.anzahl_tickets) AS \"Tickets\",\n       CASE WHEN sum(f.anzahl_tickets) = 0 THEN NULL\n            ELSE round((sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr)) / sum(f.anzahl_tickets), 2)\n       END AS \"Kosten pro Ticket\"\nFROM business.wartung_kosten_facts f\nJOIN business.dim_geraetetyp g ON g.geraetetyp_sk = f.geraetetyp_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nJOIN business.dim_standort s ON s.standort_sk = f.standort_sk\nWHERE $__timeFilter(d.datum) AND s.standortname IN ($standort)\nGROUP BY 1\nORDER BY \"Kosten pro Ticket\" DESC NULLS LAST",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Kosten, Tickets und Kostenindex je Standort",
+      "description": "Beantwortet Frage 2 für Standort: Kostenindex über 1 bedeutet mehr Kostenanteil als Ticketanteil, mögliche Überversorgung. Unter 1 bedeutet hohes Ticketaufkommen im Verhältnis zu den Kosten.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 65
       },
       "fieldConfig": {
         "defaults": {
@@ -762,6 +1136,64 @@
                 "value": 0
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kosten pro Ticket"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kostenindex"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 1.3
+                    }
+                  ]
+                }
+              }
+            ]
           }
         ]
       },
@@ -783,7 +1215,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT s.standortname AS \"Standort\",\n       sum(f.wartungskosten) AS \"Wartungskosten\",\n       sum(f.vertragskosten_pro_jahr) AS \"Vertragskosten\",\n       sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS \"Gesamtkosten\",\n       sum(f.anzahl_tickets) AS \"Tickets\"\nFROM business.wartung_kosten_facts f\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nJOIN business.dim_standort s ON s.standort_sk = f.standort_sk\nWHERE $__timeFilter(d.datum) AND s.standortname IN ($standort)\nGROUP BY 1\nORDER BY 4 DESC",
+          "rawSql": "WITH alle AS (\n    SELECT sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS gesamtkosten_alle,\n           sum(f.anzahl_tickets) AS tickets_alle\n    FROM business.wartung_kosten_facts f\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum)\n),\nje_standort AS (\n    SELECT s.standortname AS \"Standort\",\n           sum(f.wartungskosten) AS \"Wartungskosten\",\n           sum(f.vertragskosten_pro_jahr) AS \"Vertragskosten\",\n           sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS \"Gesamtkosten\",\n           sum(f.anzahl_tickets) AS \"Tickets\"\n    FROM business.wartung_kosten_facts f\n    JOIN business.dim_standort s ON s.standort_sk = f.standort_sk\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum) AND s.standortname IN ($standort)\n    GROUP BY 1\n)\nSELECT \"Standort\", \"Wartungskosten\", \"Vertragskosten\", \"Gesamtkosten\", \"Tickets\",\n       CASE WHEN \"Tickets\" = 0 THEN NULL\n            ELSE round(\"Gesamtkosten\" / \"Tickets\", 2)\n       END AS \"Kosten pro Ticket\",\n       CASE WHEN \"Tickets\" = 0 THEN NULL\n            ELSE round(\n                (\"Gesamtkosten\" / NULLIF((SELECT gesamtkosten_alle FROM alle), 0))\n                / (\"Tickets\"::numeric / NULLIF((SELECT tickets_alle FROM alle), 0))\n            , 2)\n       END AS \"Kostenindex\"\nFROM je_standort\nORDER BY \"Gesamtkosten\" DESC",
           "refId": "A"
         }
       ]

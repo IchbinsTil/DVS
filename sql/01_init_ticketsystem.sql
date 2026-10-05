@@ -16,20 +16,20 @@ CREATE TABLE src_ticketsystem.Kunde (
     -- z.B. Enterprise, Mittelstand, Startup
 );
 
-CREATE TABLE src_ticketsystem.Kundenbetreuer (
-    BetreuerNr INT PRIMARY KEY,
-    KundenNr INT NOT NULL
-        REFERENCES src_ticketsystem.Kunde(KundenNr),
-    Name VARCHAR(100) NOT NULL,
-    Team VARCHAR(50) NOT NULL
-);
-
 CREATE TABLE src_ticketsystem.Mitarbeiter (
     MitarbeiterNr INT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     Team VARCHAR(50) NOT NULL,
     -- z.B. Network-Core, Security-Ops, Field-Support
     Rolle VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE src_ticketsystem.Kundenbetreuer (
+    KundenNr INT NOT NULL
+        REFERENCES src_ticketsystem.Kunde(KundenNr),
+    MitarbeiterNr INT NOT NULL
+        REFERENCES src_ticketsystem.Mitarbeiter(MitarbeiterNr),
+    PRIMARY KEY (KundenNr, MitarbeiterNr)
 );
 
 CREATE TABLE src_ticketsystem.Ticket (

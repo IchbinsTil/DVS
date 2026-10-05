@@ -326,20 +326,14 @@ def generate_customers():
     return customers
 
 
-def generate_account_managers(customers):
+def generate_account_managers(customers, employees):
     managers = []
-    used_names = set()
 
-    for i, customer in enumerate(customers):
+    for customer in customers:
+        employee = random.choice(employees)
         managers.append({
-            "BetreuerNr": 301 + i,
             "KundenNr": customer["KundenNr"],
-            "Name": create_name(used_names),
-            "Team": random.choice([
-                "Key Accounts",
-                "Regionalbetreuung",
-                "Kundenservice",
-            ]),
+            "MitarbeiterNr": employee["MitarbeiterNr"],
         })
 
     return managers
@@ -628,7 +622,7 @@ def generate_sql():
     locations = generate_locations()
     employees = generate_employees()
     customers = generate_customers()
-    account_managers = generate_account_managers(customers)
+    account_managers = generate_account_managers(customers, employees)
     devices = generate_devices(locations, customers)
     contracts = generate_contracts(devices)
     maintenance = generate_maintenance(contracts)
@@ -758,19 +752,6 @@ def generate_sql():
     lines_tick.append("-- Kunden")
     lines_tick.append(insert_statement("src_ticketsystem", "Kunde", ["KundenNr", "Kunden_Name", "Kundentyp"], rows))
 
-    # Kundenbetreuer
-    rows = [
-        [
-            str(row["BetreuerNr"]),
-            str(row["KundenNr"]),
-            sql_string(row["Name"]),
-            sql_string(row["Team"]),
-        ]
-        for row in account_managers
-    ]
-    lines_tick.append("-- Kundenbetreuer")
-    lines_tick.append(insert_statement("src_ticketsystem", "Kundenbetreuer", ["BetreuerNr", "KundenNr", "Name", "Team"], rows))
-
     # Mitarbeiter
     rows = [
         [
@@ -783,6 +764,17 @@ def generate_sql():
     ]
     lines_tick.append("-- Mitarbeiter")
     lines_tick.append(insert_statement("src_ticketsystem", "Mitarbeiter", ["MitarbeiterNr", "Name", "Team", "Rolle"], rows))
+
+    # Kundenbetreuer
+    rows = [
+        [
+            str(row["KundenNr"]),
+            str(row["MitarbeiterNr"]),
+        ]
+        for row in account_managers
+    ]
+    lines_tick.append("-- Kundenbetreuer")
+    lines_tick.append(insert_statement("src_ticketsystem", "Kundenbetreuer", ["KundenNr", "MitarbeiterNr"], rows))
 
     # Tickets
     rows = [
