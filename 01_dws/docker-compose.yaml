@@ -1,0 +1,16 @@
+services:
+  postgres-source-inventarsystem:
+    image: postgres:17-alpine
+    container_name: ${CONTAINER_NAME}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${HOST_PORT}:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+      - ./docker-init:/docker-entrypoint-initdb.d
+volumes:
+  pgdata_prod:
