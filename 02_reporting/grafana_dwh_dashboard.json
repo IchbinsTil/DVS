@@ -7,7 +7,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 3,
+  "version": 4,
   "editable": true,
   "graphTooltip": 1,
   "refresh": "",
@@ -44,6 +44,81 @@
         "multi": true,
         "current": {},
         "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "geraetetyp",
+        "label": "Gerätetyp",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${datasource}"
+        },
+        "query": "SELECT bezeichnung FROM business.dim_geraetetyp ORDER BY 1",
+        "definition": "SELECT bezeichnung FROM business.dim_geraetetyp ORDER BY 1",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {},
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "team",
+        "label": "Team",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${datasource}"
+        },
+        "query": "SELECT DISTINCT team FROM business.dim_mitarbeiter ORDER BY 1",
+        "definition": "SELECT DISTINCT team FROM business.dim_mitarbeiter ORDER BY 1",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {},
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "prioritaet",
+        "label": "Priorität",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${datasource}"
+        },
+        "query": "SELECT bezeichnung FROM business.dim_prioritaet ORDER BY 1",
+        "definition": "SELECT bezeichnung FROM business.dim_prioritaet ORDER BY 1",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {},
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "mitarbeiter_suche",
+        "label": "Mitarbeiter-Suche (Text)",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "value": "",
+          "text": ""
+        },
+        "hide": 0
+      },
+      {
+        "name": "granularitaet",
+        "label": "Granularität (Drilldown)",
+        "type": "custom",
+        "query": "Jahr : year,Quartal : quarter,Monat : month,Tag : day",
+        "current": {
+          "value": "month",
+          "text": "Monat"
+        },
+        "multi": false,
+        "includeAll": false,
         "hide": 0
       }
     ]
@@ -1140,6 +1215,24 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Standort"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Drilldown: nach diesem Standort filtern (Gerätetyp-Panels unten)",
+                    "url": "?${__url.params}&var-standort=${__value.text}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Kosten pro Ticket"
             },
             "properties": [
@@ -1216,6 +1309,487 @@
           "format": "table",
           "rawQuery": true,
           "rawSql": "WITH alle AS (\n    SELECT sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS gesamtkosten_alle,\n           sum(f.anzahl_tickets) AS tickets_alle\n    FROM business.wartung_kosten_facts f\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum)\n),\nje_standort AS (\n    SELECT s.standortname AS \"Standort\",\n           sum(f.wartungskosten) AS \"Wartungskosten\",\n           sum(f.vertragskosten_pro_jahr) AS \"Vertragskosten\",\n           sum(f.wartungskosten) + sum(f.vertragskosten_pro_jahr) AS \"Gesamtkosten\",\n           sum(f.anzahl_tickets) AS \"Tickets\"\n    FROM business.wartung_kosten_facts f\n    JOIN business.dim_standort s ON s.standort_sk = f.standort_sk\n    JOIN business.dim_datum d ON d.datum_sk = f.datum_sk\n    WHERE $__timeFilter(d.datum) AND s.standortname IN ($standort)\n    GROUP BY 1\n)\nSELECT \"Standort\", \"Wartungskosten\", \"Vertragskosten\", \"Gesamtkosten\", \"Tickets\",\n       CASE WHEN \"Tickets\" = 0 THEN NULL\n            ELSE round(\"Gesamtkosten\" / \"Tickets\", 2)\n       END AS \"Kosten pro Ticket\",\n       CASE WHEN \"Tickets\" = 0 THEN NULL\n            ELSE round(\n                (\"Gesamtkosten\" / NULLIF((SELECT gesamtkosten_alle FROM alle), 0))\n                / (\"Tickets\"::numeric / NULLIF((SELECT tickets_alle FROM alle), 0))\n            , 2)\n       END AS \"Kostenindex\"\nFROM je_standort\nORDER BY \"Gesamtkosten\" DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 75
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Zusätzliche OLAP-Demonstrationen\n\nDie folgenden Panels ergänzen die bereits genutzten OLAP-Funktionen Slice (Zeitbereich, Standort-Auswahl) und Klick-Auswahlfelder um die noch fehlenden Elemente. Sie beziehen sich bewusst nicht auf die beiden Fragestellungen, sondern nutzen zusätzliche Dimensionen aus dem Business-Schema, um die jeweilige OLAP-Funktion am Datenmodell zu zeigen.\n\n**Dice**: zwei Dimensionen gleichzeitig einschränken, zum Beispiel Standort und Gerätetyp, oder Team und Priorität.\n**Drilldown**: Granularität der Zeitachse über eine Auswahl von Jahr bis Tag verfeinern.\n**Pivot**: Gerätetyp als Zeile, Quartal als Spalte, Wartungskosten als Wert.\n**Textauswahlfeld**: Freitextsuche nach einem Mitarbeiternamen."
+      }
+    },
+    {
+      "id": 31,
+      "type": "row",
+      "title": "Zusätzliche OLAP-Funktionen: Dice, Drilldown, Pivot, Textauswahl",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 80
+      },
+      "panels": []
+    },
+    {
+      "id": 32,
+      "type": "table",
+      "title": "Wartungskosten je Standort und Gerätetyp (Dice)",
+      "description": "Dice: Standort (Variable oben) und Gerätetyp (eigene Variable) werden gleichzeitig eingeschränkt. Beide Dimensionen stammen aus dem Business-Schema (Dim_Standort, Dim_Geraetetyp).",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 81
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Wartungskosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Vertragskosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Standort",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT s.standortname AS \"Standort\", g.bezeichnung AS \"Gerätetyp\",\n       sum(f.wartungskosten) AS \"Wartungskosten\",\n       sum(f.vertragskosten_pro_jahr) AS \"Vertragskosten\",\n       sum(f.anzahl_tickets) AS \"Tickets\"\nFROM business.wartung_kosten_facts f\nJOIN business.dim_standort s ON s.standort_sk = f.standort_sk\nJOIN business.dim_geraetetyp g ON g.geraetetyp_sk = f.geraetetyp_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\n  AND s.standortname IN ($standort)\n  AND g.bezeichnung IN ($geraetetyp)\nGROUP BY 1, 2\nORDER BY 1, 2",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "table",
+      "title": "SLA-Vorgänge je Team und Priorität (Dice)",
+      "description": "Dice auf der zweiten Faktentabelle: Team und Priorität werden gleichzeitig eingeschränkt (Dim_Mitarbeiter, Dim_Prioritaet).",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 81
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ø Abweichung (Min.)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "m"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Team",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.team AS \"Team\", p.bezeichnung AS \"Priorität\",\n       count(*) AS \"Anzahl Vorgänge\",\n       round(avg(f.sla_abweichung_minuten), 1) AS \"Ø Abweichung (Min.)\"\nFROM business.sla_bearbeitung_facts f\nJOIN business.dim_mitarbeiter m ON m.mitarbeiter_sk = f.mitarbeiter_sk\nJOIN business.dim_prioritaet p ON p.prioritaet_sk = f.prioritaet_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\n  AND m.team IN ($team)\n  AND p.bezeichnung IN ($prioritaet)\nGROUP BY 1, 2\nORDER BY 1, 2",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "type": "timeseries",
+      "title": "SLA-Quote nach Zeitgranularität (Drilldown)",
+      "description": "Drilldown über die Variable Granularität oben: Jahr, Quartal, Monat oder Tag. Die Abfrage wechselt date_trunc('$granularitaet', ...) entsprechend der Auswahl und aggregiert neu, von grob nach fein.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_trunc('$granularitaet', d.datum)::timestamp AS time,\n       100.0 * count(*) FILTER (WHERE f.sla_abweichung_minuten <= 0) / NULLIF(count(*), 0) AS \"SLA-Quote\"\nFROM business.sla_bearbeitung_facts f\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "type": "table",
+      "title": "Wartungskosten je Gerätetyp und Quartal (Pivot)",
+      "description": "Pivot: Gerätetyp als Zeile, Quartal als Spalte, Wartungskosten als Wert. Entspricht dem Umklappen einer langen Tabelle (Gerätetyp, Quartal, Kosten) in eine Kreuztabelle.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 98
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2024 Q1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2024 Q2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2024 Q3"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2024 Q4"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2025 Q1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2025 Q2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2025 Q3"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2025 Q4"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gesamt"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Gerätetyp",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT g.bezeichnung AS \"Gerätetyp\",\n       sum(CASE WHEN d.jahr=2024 AND d.quartal=1 THEN f.wartungskosten ELSE 0 END) AS \"2024 Q1\",\n       sum(CASE WHEN d.jahr=2024 AND d.quartal=2 THEN f.wartungskosten ELSE 0 END) AS \"2024 Q2\",\n       sum(CASE WHEN d.jahr=2024 AND d.quartal=3 THEN f.wartungskosten ELSE 0 END) AS \"2024 Q3\",\n       sum(CASE WHEN d.jahr=2024 AND d.quartal=4 THEN f.wartungskosten ELSE 0 END) AS \"2024 Q4\",\n       sum(CASE WHEN d.jahr=2025 AND d.quartal=1 THEN f.wartungskosten ELSE 0 END) AS \"2025 Q1\",\n       sum(CASE WHEN d.jahr=2025 AND d.quartal=2 THEN f.wartungskosten ELSE 0 END) AS \"2025 Q2\",\n       sum(CASE WHEN d.jahr=2025 AND d.quartal=3 THEN f.wartungskosten ELSE 0 END) AS \"2025 Q3\",\n       sum(CASE WHEN d.jahr=2025 AND d.quartal=4 THEN f.wartungskosten ELSE 0 END) AS \"2025 Q4\",\n       sum(f.wartungskosten) AS \"Gesamt\"\nFROM business.wartung_kosten_facts f\nJOIN business.dim_geraetetyp g ON g.geraetetyp_sk = f.geraetetyp_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "type": "table",
+      "title": "Bearbeitungsvorgänge nach Mitarbeiter (Textauswahlfeld)",
+      "description": "Auswahlfeld vom Typ Text: Die Variable Mitarbeiter-Suche oben ist ein Freitextfeld. Leer zeigt alle Mitarbeiter, ein eingegebener Name filtert per ILIKE.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 107
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Anzahl Vorgänge",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT m.name AS \"Mitarbeiter\", m.team AS \"Team\",\n       count(*) AS \"Anzahl Vorgänge\",\n       round(avg(f.sla_abweichung_minuten), 1) AS \"Ø Abweichung (Min.)\"\nFROM business.sla_bearbeitung_facts f\nJOIN business.dim_mitarbeiter m ON m.mitarbeiter_sk = f.mitarbeiter_sk\nJOIN business.dim_datum d ON d.datum_sk = f.datum_sk\nWHERE $__timeFilter(d.datum)\n  AND ('$mitarbeiter_suche' = '' OR m.name ILIKE '%$mitarbeiter_suche%')\nGROUP BY 1, 2\nORDER BY 3 DESC",
           "refId": "A"
         }
       ]
